@@ -1,50 +1,121 @@
-# Welcome to your Expo app 👋
+# 📄 Projeto Mottu: Gestão de Motos no Pátio
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 🌟 Objetivo
+Desenvolver um sistema multiplataforma para gestão inteligente de motos nos pátios da Mottu, com foco em:
+- Organização e localização em tempo real
+- Registro de movimentações
+- Integração com banco Oracle e APIs RESTful
+- Escalabilidade para +100 filiais
 
-## Get started
+---
 
-1. Install dependencies
+## 📊 Solução Proposta
+A solução é composta por:
 
-   ```bash
-   npm install
-   ```
+- 📱 **Aplicativo mobile** em React Native com Expo
+- 🚀 **API RESTful** com ASP.NET Core (EF Core + Oracle)
+- 🏢 **Banco de dados relacional Oracle** com modelo normalizado
+- ⚖️ **Deploy com Docker e Azure CLI** (Sprint 2)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🔧 Funcionalidades do App Mobile
 
-In the output, you'll find options to open the app in a
+### 🏠 Dashboard
+- Visualização geral das motos alocadas
+- Indicadores operacionais (ex: vagas livres, em manutenção)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 🚗 Cadastro de Motos
+- Placa, modelo, status e vaga
+- Sugestão automática de vaga disponível
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 🔄 Registro de Movimentações
+- Entrada / saída da moto
+- Data, hora, operador e vaga
 
-## Get a fresh project
+### 🖊️ Mapa do Pátio
+- Vagas visuais (A1, A2, B1...)
+- Grid com cores por status (ocupado/livre)
 
-When you're ready, run:
+### 📃 Armazenamento Local (Sprint 1)
+- Uso de `AsyncStorage` para persistir dados offline
 
-```bash
-npm run reset-project
+---
+
+## 🔧 Funcionalidades da API (.NET)
+
+### Entidade Moto
+- `GET /api/motos`
+- `GET /api/motos/{id}`
+- `POST /api/motos`
+- `PUT /api/motos/{id}`
+- `DELETE /api/motos/{id}`
+
+### Entidade Movimentação
+- `GET /api/movimentacoes`
+- `POST /api/movimentacoes`
+- `GET /api/movimentacoes/moto/{placa}`
+
+### Outros:
+- Swagger/OpenAPI
+- Validações com DataAnnotations
+- Banco Oracle via EF Core + Migrations
+
+---
+
+## 📃 Banco de Dados (Oracle)
+- Tabelas: `tb_moto`, `tb_movimentacao`, `tb_operador`, `tb_manutencao`, `tb_vaga`
+- Modelo em 3FN com relacionamento e PK/FK
+- Scripts PL/SQL para consultas e joins
+
+---
+
+## 🤝 Tecnologias Utilizadas
+| Camada          | Tecnologias                     |
+|----------------|----------------------------------|
+| App Mobile     | React Native + Expo             |
+| Armazenamento  | AsyncStorage                    |
+| Backend        | ASP.NET Core + EF Core          |
+| Banco de Dados | Oracle SQL                      |
+| Documentação   | Swagger (OpenAPI)                |
+| DevOps         | Docker + Azure CLI              |
+
+---
+
+## 🔹 Estrutura do Projeto
+```
+/app-mobile
+  /screens
+  /services
+  App.tsx
+  storage.ts
+
+/api-dotnet
+  /Controllers
+  /Models
+  /Data
+  Program.cs
+  Startup.cs
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 🚀 Inovações e Diferenciais
+- Sugestão automática de vagas livres
+- Mapa visual com status em cores
+- Simulação de status da moto (ativa/desligada)
+- Painel com indicadores em tempo real
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 📋 Roadmap por Sprint
+| Sprint | Entregas |
+|--------|----------|
+| Sprint 1 | App funcional com dados locais e API .NET com CRUD |
+| Sprint 2 | Integração API/app + deploy via Docker na Azure |
+| Sprint 3 | Relatórios e indicadores + otimização completa |
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🎉 Conclusão
+A proposta oferece uma solução robusta e escalável para os desafios da Mottu, com foco em rastreabilidade, agilidade e expansão para múltiplas filiais, utilizando tecnologias modernas e multiplataforma.
