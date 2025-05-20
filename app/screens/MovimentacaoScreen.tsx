@@ -1,39 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from '../constants/Color';
 
 export default function MovimentacaoScreen() {
   const [placa, setPlaca] = useState('');
-  const [tipo, setTipo] = useState<'entrada' | 'saida' | ''>('');
+  const [tipo, setTipo] = useState('');
   const [vaga, setVaga] = useState('');
 
   const registrarMovimentacao = async () => {
-    if (!placa || !tipo || !vaga) {
+    const placaUpper = placa.trim().toUpperCase();
+    const vagaUpper = vaga.trim().toUpperCase();
+
+    if (!placaUpper || !tipo || !vagaUpper) {
       Alert.alert('Preencha todos os campos.');
       return;
     }
 
-    const movimentacao = {
-      placa,
-      tipo,
-      vaga,
-      dataHora: new Date().toISOString(),
-    };
-
     try {
-      const historicoExistente = await AsyncStorage.getItem(`movimentacoes-${placa}`);
+      // Verifica se a moto está cadastrada
+      const motoData = await AsyncStorage.getItem(`moto-${placaUpper}`);
+      if (!motoData) {
+        Alert.alert('Moto não encontrada. Cadastre primeiro.');
+        return;
+      }
+
+      const movimentacao = {
+        placa: placaUpper,
+        tipo: tipo.toLowerCase(),
+        vaga: vagaUpper,
+        dataHora: new Date().toISOString(),
+      };
+
+      // Atualiza histórico de movimentações
+      const historicoExistente = await AsyncStorage.getItem(`movimentacoes-${placaUpper}`);
       const historico = historicoExistente ? JSON.parse(historicoExistente) : [];
-
       historico.push(movimentacao);
+      await AsyncStorage.setItem(`movimentacoes-${placaUpper}`, JSON.stringify(historico));
 
-      await AsyncStorage.setItem(`movimentacoes-${placa}`, JSON.stringify(historico));
+      // Atualiza a vaga atual da moto (se for entrada ou mudança de vaga)
+      const motoAtual = JSON.parse(motoData);
+      motoAtual.vaga = vagaUpper;
+      await AsyncStorage.setItem(`moto-${placaUpper}`, JSON.stringify(motoAtual));
 
       Alert.alert('Movimentação registrada com sucesso!');
       setPlaca('');
       setTipo('');
       setVaga('');
-    }  catch (error: any) {
-        Alert.alert('Erro ao carregar as Movimentaçãoes:', error.message || String(error));
+    } catch (error) {
+      Alert.alert('Erro ao registrar movimentação.');
     }
   };
 
@@ -42,33 +57,23 @@ export default function MovimentacaoScreen() {
       <Text style={styles.label}>Placa:</Text>
       <TextInput style={styles.input} value={placa} onChangeText={setPlaca} />
 
-      <Text style={styles.label}>Tipo de movimentação (entrada/saida):</Text>
-      <TextInput style={styles.input} value={tipo} onChangeText={(text) => setTipo(text.toLowerCase() as 'entrada' | 'saida')} />
+      <Text style={styles.label}>Tipo (entrada / saida):</Text>
+      <TextInput style={styles.input} value={tipo} onChangeText={setTipo} />
 
       <Text style={styles.label}>Vaga:</Text>
       <TextInput style={styles.input} value={vaga} onChangeText={setVaga} />
 
-      <Button title="Registrar Movimentação" onPress={registrarMovimentacao} />
+      <TouchableOpacity style={styles.button} onPress={registrarMovimentacao}>
+        <Text style={styles.buttonText}>Registrar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    gap: 12,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 12,
-    borderRadius: 5,
-  },
+  container: { flex: 1, backgroundColor: Colors.background, padding: 20 },
+  label: { color: Colors.text, fontWeight: 'bold', marginBottom: 5 },
+  input: { backgroundColor: Colors.card, color: Colors.text, borderWidth: 1, borderColor: Colors.inputBorder, borderRadius: 6, padding: 10, marginBottom: 15 },
+  button: { backgroundColor: Colors.primary, padding: 14, borderRadius: 8, alignItems: 'center' },
+  buttonText: { color: Colors.text, fontWeight: 'bold' },
 });

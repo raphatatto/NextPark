@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VAGAS_FIXAS } from '../constants/vagas';
+import { Colors } from '../constants/Color';
 
 export default function CadastroMotoScreen() {
   const [placa, setPlaca] = useState('');
@@ -14,61 +15,42 @@ export default function CadastroMotoScreen() {
       const keys = await AsyncStorage.getAllKeys();
       const motosKeys = keys.filter((k) => k.startsWith('moto-'));
       const resultados = await AsyncStorage.multiGet(motosKeys);
-      const ocupadas = resultados.map(([_, val]) => val ? JSON.parse(val).vaga : null).filter(Boolean);
+      const ocupadas = resultados.map(([_, val]) => val ? JSON.parse(val).vaga.toUpperCase() : null).filter(Boolean);
       setVagasOcupadas(ocupadas);
-
-      // Sugerir próxima vaga livre
       const vagaSugerida = VAGAS_FIXAS.find(v => !ocupadas.includes(v));
       if (vagaSugerida) setVaga(vagaSugerida);
     };
-
     buscarVagasOcupadas();
   }, []);
 
-    const salvarMoto = async () => {
-    if (!placa || !modelo || !vaga) {
-        Alert.alert('Preencha todos os campos!');
-        return;
+  const salvarMoto = async () => {
+    if (!placa || !modelo || !vaga) return Alert.alert('Preencha todos os campos!');
+    const keys = await AsyncStorage.getAllKeys();
+    if (keys.includes(`moto-${placa.toUpperCase()}`)) return Alert.alert('Placa já cadastrada.');
+
+    const motosKeys = keys.filter((k) => k.startsWith('moto-'));
+    const resultados = await AsyncStorage.multiGet(motosKeys);
+    const ocupadasAtual = resultados.map(([_, val]) => val ? JSON.parse(val).vaga.toUpperCase() : null).filter(Boolean);
+
+    if (ocupadasAtual.includes(vaga.toUpperCase())) {
+      Alert.alert(`A vaga ${vaga.toUpperCase()} já está ocupada.`);
+      return;
     }
 
-    try {
-        // Revalida as vagas ocupadas em tempo real
-        const keys = await AsyncStorage.getAllKeys();
-        const motosKeys = keys.filter((k) => k.startsWith('moto-'));
-        const resultados = await AsyncStorage.multiGet(motosKeys);
-        const ocupadasAtual = resultados
-        .map(([_, val]) => val ? JSON.parse(val).vaga : null)
-        .filter(Boolean);
-
-        if (ocupadasAtual.map(v => v.toUpperCase()).includes(vaga.toUpperCase())) {
-        Alert.alert(`A vaga ${vaga} já está ocupada. Escolha outra.`);
-        return;
-        }
-
-        if (keys.includes(`moto-${placa.toUpperCase()}`)) {
-        Alert.alert('Essa placa já está cadastrada.');
-        return;
-        }
-
-
-        const novaMoto = {
-        placa: placa.toUpperCase(),
-        modelo,
-        vaga: vaga.toUpperCase(),
-        status: 'Alocada',
-        dataCadastro: new Date().toISOString(),
-        };
-
-
-        await AsyncStorage.setItem(`moto-${placa}`, JSON.stringify(novaMoto));
-        Alert.alert(`Moto cadastrada com sucesso na vaga ${vaga}`);
-        setPlaca('');
-        setModelo('');
-        setVaga('');
-    } catch (error) {
-        Alert.alert('Erro ao salvar a moto');
-    }
+    const novaMoto = {
+      placa: placa.toUpperCase(),
+      modelo,
+      vaga: vaga.toUpperCase(),
+      status: 'Alocada',
+      dataCadastro: new Date().toISOString(),
     };
+
+    await AsyncStorage.setItem(`moto-${placa.toUpperCase()}`, JSON.stringify(novaMoto));
+    Alert.alert(`Moto cadastrada na vaga ${vaga.toUpperCase()}`);
+    setPlaca('');
+    setModelo('');
+    setVaga('');
+  };
 
   return (
     <View style={styles.container}>
@@ -78,30 +60,20 @@ export default function CadastroMotoScreen() {
       <Text style={styles.label}>Modelo:</Text>
       <TextInput style={styles.input} value={modelo} onChangeText={setModelo} />
 
-      <Text style={styles.label}>Vaga sugerida (editável):</Text>
+      <Text style={styles.label}>Vaga (sugerida ou manual):</Text>
       <TextInput style={styles.input} value={vaga} onChangeText={setVaga} />
 
-      <Button title="Salvar Moto" onPress={salvarMoto} />
+      <TouchableOpacity style={styles.button} onPress={salvarMoto}>
+        <Text style={styles.buttonText}>Salvar Moto</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    gap: 12,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 12,
-    borderRadius: 5,
-  },
+  container: { flex: 1, backgroundColor: Colors.background, padding: 20 },
+  label: { color: Colors.text, marginBottom: 5, fontWeight: 'bold' },
+  input: { backgroundColor: Colors.card, borderColor: Colors.inputBorder, borderWidth: 1, borderRadius: 6, color: Colors.text, padding: 10, marginBottom: 15 },
+  button: { backgroundColor: Colors.primary, padding: 14, borderRadius: 8, alignItems: 'center' },
+  buttonText: { color: Colors.text, fontWeight: 'bold' },
 });
