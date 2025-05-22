@@ -1,5 +1,13 @@
 # 📄 Projeto Mottu: Gestão de Motos no Pátio
 
+## 🚀 Descrição do Projeto
+
+Nosso projeto tem como objetivo otimizar a organização do pátio da Mottu. Para isso, desenvolvemos um aplicativo mobile voltado para os operadores de pátio e demais funcionários, permitindo localizar rapidamente qualquer moto dentro do espaço.
+
+A solução utiliza câmeras instaladas em pontos estratégicos do pátio, combinadas com um sistema de mapeamento de vagas padronizadas (ex: "A1", "A2", etc). O usuário poderá inserir a placa da moto no aplicativo, e o sistema informará em qual vaga ela está estacionada.
+
+Além disso, ao receber uma nova moto, o operador poderá cadastrá-la no sistema e, automaticamente, o aplicativo irá sugerir uma vaga livre, otimizando o processo de alocação e evitando desorganização.
+
 ## 🌟 Objetivo
 Desenvolver um sistema multiplataforma para gestão inteligente de motos nos pátios da Mottu, com foco em:
 - Organização e localização em tempo real
